@@ -1,5 +1,13 @@
 import React from 'react';
 
+interface AdexViewerHandle {
+    goToPage: (page: number) => void;
+    rotatePage: (page: number, clockwise?: boolean) => void;
+    getCurrentPage: () => number;
+    getTotalPages: () => number | null;
+    getZoom: () => number;
+    setZoom: (z: number) => void;
+}
 interface PDFViewerProps {
     data: {
         url: string;
@@ -41,12 +49,19 @@ interface PDFViewerProps {
         pageRangeEnabled?: boolean;
     };
     theme?: string | null;
+    onPageChanged?: (pageIndex: number) => void | Promise<void>;
+    onLoaded?: (pos: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }) => void | Promise<void>;
 }
 interface LocalizationOptions {
     locale: string;
     title: string;
     active: boolean;
 }
-declare const AdexViewer: React.FC<PDFViewerProps>;
+declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<PDFViewerProps & React.RefAttributes<AdexViewerHandle>>>;
 
-export { AdexViewer };
+export { _default as AdexViewer };
