@@ -2990,7 +2990,17 @@ var require_zh_TW = __commonJS({
 });
 
 // src/AdexViewer.tsx
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  forwardRef,
+  memo,
+  useImperativeHandle,
+  useLayoutEffect
+} from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
@@ -3039,7 +3049,7 @@ var globImport_locales_json = __glob({
 
 // src/AdexViewer.tsx
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-var AdexViewer = ({
+var AdexViewer = forwardRef(({
   data,
   credits,
   showSidebar,
@@ -3114,8 +3124,10 @@ var AdexViewer = ({
   printOptions = {
     printBackground: true,
     pageRangeEnabled: true
-  }
-}) => {
+  },
+  onPageChanged,
+  onLoaded
+}, ref) => {
   var _a;
   const scaleSets = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
   const [numPages, setNumPages] = useState(null);
@@ -3177,6 +3189,17 @@ var AdexViewer = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentDrawingPoints, setCurrentDrawingPoints] = useState([]);
   const [showAnnotationsSidebar, setShowAnnotationsSidebar] = useState(false);
+  useLayoutEffect(() => {
+    if (onLoaded && viewerRef.current) {
+      const r = viewerRef.current.getBoundingClientRect();
+      onLoaded({
+        x: r.left + window.scrollX,
+        y: r.top + window.scrollY,
+        width: r.width,
+        height: r.height
+      });
+    }
+  }, []);
   useEffect(() => {
     const savedLocale = localStorage.getItem("userLocale");
     if (savedLocale) {
@@ -3310,6 +3333,7 @@ var AdexViewer = ({
   const goToPage = useCallback((pageNum) => {
     setPreviewNumber(pageNum);
     setPageNumber(pageNum);
+    onPageChanged == null ? void 0 : onPageChanged(pageNum);
     const pageEl = pageRefs.current[pageNum];
     if (pageEl) {
       pageEl.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -3340,15 +3364,15 @@ var AdexViewer = ({
           if (typeof item.dest === "string") {
             const dest = yield pdf.getDestination(item.dest);
             if (dest) {
-              const ref = yield pdf.getPageRef(dest[0]);
-              const pageIndex = yield pdf.getPageIndex(ref);
+              const ref2 = yield pdf.getPageRef(dest[0]);
+              const pageIndex = yield pdf.getPageIndex(ref2);
               pageNumber2 = pageIndex + 1;
             }
           } else if (Array.isArray(item.dest)) {
-            const ref = item.dest[0];
-            if (ref) {
+            const ref2 = item.dest[0];
+            if (ref2) {
               try {
-                const pageIndex = yield pdf.getPageIndex(ref);
+                const pageIndex = yield pdf.getPageIndex(ref2);
                 pageNumber2 = pageIndex + 1;
               } catch (error) {
                 console.error("Error getting page index from ref:", error);
@@ -3401,15 +3425,15 @@ var AdexViewer = ({
           if (typeof item.dest === "string") {
             const dest = yield pdfDocument.getDestination(item.dest);
             if (dest) {
-              const ref = yield pdfDocument.getPageRef(dest[0]);
-              const pageIndex = yield pdfDocument.getPageIndex(ref);
+              const ref2 = yield pdfDocument.getPageRef(dest[0]);
+              const pageIndex = yield pdfDocument.getPageIndex(ref2);
               pageNumber2 = pageIndex + 1;
             }
           } else if (Array.isArray(item.dest)) {
-            const ref = item.dest[0];
-            if (ref) {
+            const ref2 = item.dest[0];
+            if (ref2) {
               try {
-                const pageIndex = yield pdfDocument.getPageIndex(ref);
+                const pageIndex = yield pdfDocument.getPageIndex(ref2);
                 pageNumber2 = pageIndex + 1;
               } catch (error) {
                 console.error("Error getting page index from ref:", error);
@@ -3529,6 +3553,7 @@ var AdexViewer = ({
       });
       setPreviewNumber(closestPage);
       setPageNumber(closestPage);
+      onPageChanged == null ? void 0 : onPageChanged(closestPage);
     };
     const debouncedHandleScroll = debounce(handleScroll, 500);
     const scrollContainer = previewRef.current;
@@ -4330,6 +4355,18 @@ var AdexViewer = ({
       ] });
     },
     [deleteAnnotation, updateAnnotation]
+  );
+  useImperativeHandle(
+    ref,
+    () => ({
+      goToPage,
+      rotatePage,
+      getCurrentPage: () => pageNumber,
+      getTotalPages: () => numPages,
+      getZoom: () => scale,
+      setZoom: (z) => setScale(z)
+    }),
+    [goToPage, rotatePage, pageNumber, numPages, scale]
   );
   return /* @__PURE__ */ jsxs(
     "div",
@@ -5237,8 +5274,8 @@ var AdexViewer = ({
       ]
     }
   );
-};
-var AdexViewer_default = AdexViewer;
+});
+var AdexViewer_default = memo(AdexViewer);
 export {
   AdexViewer_default as AdexViewer
 };
