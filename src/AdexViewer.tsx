@@ -8,7 +8,7 @@ import {
   forwardRef,
   memo,
   useImperativeHandle,
-  useLayoutEffect
+  useLayoutEffect, CSSProperties
 } from "react"
 import type React from "react"
 
@@ -20,7 +20,7 @@ import "./index.css"
 // Set worker source for pdf.js
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
 
-export interface Annotation {
+interface Annotation {
   id: string
   pageNumber: number
   type: "highlight" | "note" | "drawing"
@@ -36,7 +36,7 @@ export interface Annotation {
   createdAt: number
 }
 
-export interface AdexViewerHandle {
+interface AdexViewerHandle {
   goToPage: (page: number) => void
   rotatePage: (page: number, clockwise?: boolean) => void
   getCurrentPage: () => number
@@ -46,6 +46,8 @@ export interface AdexViewerHandle {
 }
 
 interface PDFViewerProps {
+  className?: string;
+  style?: CSSProperties;
   data: { url: string }
   credits?: boolean | null
   showSidebar?: boolean | null
@@ -88,14 +90,14 @@ interface PDFViewerProps {
   onLoaded?: (pos: { x: number; y: number; width: number; height: number }) => void | Promise<void>
 }
 
-export interface LocalizationOptions {
+interface LocalizationOptions {
   locale: string
   title: string
   active: boolean
 }
 
 // Define a type for search results
-export interface SearchResult {
+interface SearchResult {
   pageIndex: number
   matchIndex: number
   text: string
@@ -109,7 +111,7 @@ export interface SearchResult {
 }
 
 // Add these new interfaces for outline and bookmarks
-export interface OutlineItem {
+interface OutlineItem {
   title: string
   dest?: any
   items?: OutlineItem[]
@@ -118,7 +120,7 @@ export interface OutlineItem {
   id: string
 }
 
-export interface Bookmark {
+interface Bookmark {
   id: string
   title: string
   pageNumber: number
@@ -127,6 +129,8 @@ export interface Bookmark {
 
 // Update the default props to include bookmarks
 const AdexViewer = forwardRef<AdexViewerHandle, PDFViewerProps>(({
+                                                                   className,
+    style,
   data,
   credits,
   showSidebar,
@@ -1801,7 +1805,8 @@ const AdexViewer = forwardRef<AdexViewerHandle, PDFViewerProps>(({
   return (
     <div
       ref={viewerRef}
-      className={`PDFViewer adex-viewer ${
+      style={style}
+      className={`PDFViewer adex-viewer ${className || ''} ${
         fullScreenView ? "fullScreenView" : ""
       } ${sidebar ? "thumbs-slide-in" : "thumbs-slide-out"} dev-abhishekbagul ${isMobile ? "adex-mobile" : ""} ${!textOptions.enableSelection ? "disable-text-selection" : ""} ${isPrinting ? "adex-printing" : ""} ${(theme) ? theme : ""}`}
     >
@@ -2760,4 +2765,5 @@ const AdexViewer = forwardRef<AdexViewerHandle, PDFViewerProps>(({
   )
 })
 
+export type { AdexViewerHandle, Bookmark, Annotation, SearchResult, OutlineItem };
 export default memo(AdexViewer);

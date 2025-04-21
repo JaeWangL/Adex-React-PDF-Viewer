@@ -3053,6 +3053,8 @@ var globImport_locales_json = __glob({
 // src/AdexViewer.tsx
 import_react_pdf.pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${import_react_pdf.pdfjs.version}/pdf.worker.min.js`;
 var AdexViewer = (0, import_react.forwardRef)(({
+  className,
+  style,
   data,
   credits,
   showSidebar,
@@ -3634,9 +3636,9 @@ var AdexViewer = (0, import_react.forwardRef)(({
   }, [originalZoom, scale]);
   (0, import_react.useEffect)(() => {
     if (isPrinting) {
-      const style = document.createElement("style");
-      style.id = "adex-print-styles";
-      style.innerHTML = `
+      const style2 = document.createElement("style");
+      style2.id = "adex-print-styles";
+      style2.innerHTML = `
         @media print {
           body * {
             visibility: hidden;
@@ -3677,7 +3679,7 @@ var AdexViewer = (0, import_react.forwardRef)(({
           }
         }
       `;
-      document.head.appendChild(style);
+      document.head.appendChild(style2);
       return () => {
         const styleElement = document.getElementById("adex-print-styles");
         if (styleElement) {
@@ -4375,7 +4377,8 @@ var AdexViewer = (0, import_react.forwardRef)(({
     "div",
     {
       ref: viewerRef,
-      className: `PDFViewer adex-viewer ${fullScreenView ? "fullScreenView" : ""} ${sidebar ? "thumbs-slide-in" : "thumbs-slide-out"} dev-abhishekbagul ${isMobile ? "adex-mobile" : ""} ${!textOptions.enableSelection ? "disable-text-selection" : ""} ${isPrinting ? "adex-printing" : ""} ${theme ? theme : ""}`,
+      style,
+      className: `PDFViewer adex-viewer ${className || ""} ${fullScreenView ? "fullScreenView" : ""} ${sidebar ? "thumbs-slide-in" : "thumbs-slide-out"} dev-abhishekbagul ${isMobile ? "adex-mobile" : ""} ${!textOptions.enableSelection ? "disable-text-selection" : ""} ${isPrinting ? "adex-printing" : ""} ${theme ? theme : ""}`,
       children: [
         showToolbar && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adex-topbar", children: [
           (showControls == null ? void 0 : showControls.navigation) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "adex-control-page", children: [
