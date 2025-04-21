@@ -20,7 +20,7 @@ import "./index.css"
 // Set worker source for pdf.js
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
 
-interface Annotation {
+export interface Annotation {
   id: string
   pageNumber: number
   type: "highlight" | "note" | "drawing"
@@ -88,14 +88,14 @@ interface PDFViewerProps {
   onLoaded?: (pos: { x: number; y: number; width: number; height: number }) => void | Promise<void>
 }
 
-interface LocalizationOptions {
+export interface LocalizationOptions {
   locale: string
   title: string
   active: boolean
 }
 
 // Define a type for search results
-interface SearchResult {
+export interface SearchResult {
   pageIndex: number
   matchIndex: number
   text: string
@@ -109,7 +109,7 @@ interface SearchResult {
 }
 
 // Add these new interfaces for outline and bookmarks
-interface OutlineItem {
+export interface OutlineItem {
   title: string
   dest?: any
   items?: OutlineItem[]
@@ -118,7 +118,7 @@ interface OutlineItem {
   id: string
 }
 
-interface Bookmark {
+export interface Bookmark {
   id: string
   title: string
   pageNumber: number

@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface AdexViewerHandle {
+export interface AdexViewerHandle {
     goToPage: (page: number) => void;
     rotatePage: (page: number, clockwise?: boolean) => void;
     getCurrentPage: () => number;
@@ -57,7 +57,7 @@ interface PDFViewerProps {
         height: number;
     }) => void | Promise<void>;
 }
-interface LocalizationOptions {
+export interface LocalizationOptions {
     locale: string;
     title: string;
     active: boolean;
