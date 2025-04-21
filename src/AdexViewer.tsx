@@ -1,5 +1,15 @@
 "use client"
-import { useEffect, useState, useRef, useCallback, useMemo } from "react"
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  forwardRef,
+  memo,
+  useImperativeHandle,
+  useLayoutEffect
+} from "react"
 import type React from "react"
 
 import { Document, Page, pdfjs } from "react-pdf"
@@ -26,7 +36,14 @@ interface Annotation {
   createdAt: number
 }
 
-
+export interface AdexViewerHandle {
+  goToPage: (page: number) => void
+  rotatePage: (page: number, clockwise?: boolean) => void
+  getCurrentPage: () => number
+  getTotalPages: () => number | null
+  getZoom: () => number
+  setZoom: (z: number) => void
+}
 
 interface PDFViewerProps {
   data: { url: string }
@@ -67,6 +84,8 @@ interface PDFViewerProps {
     pageRangeEnabled?: boolean
   }
   theme?:string | null
+  onPageChanged?: (pageIndex: number) => void | Promise<void>
+  onLoaded?: (pos: { x: number; y: number; width: number; height: number }) => void | Promise<void>
 }
 
 interface LocalizationOptions {
@@ -107,7 +126,7 @@ interface Bookmark {
 }
 
 // Update the default props to include bookmarks
-const AdexViewer: React.FC<PDFViewerProps> = ({
+const AdexViewer = forwardRef<AdexViewerHandle, PDFViewerProps>(({
   data,
   credits,
   showSidebar,
@@ -183,7 +202,10 @@ const AdexViewer: React.FC<PDFViewerProps> = ({
     printBackground: true,
     pageRangeEnabled: true,
   },
-}) => {
+                                                                   onPageChanged,
+                                                                   onLoaded,
+
+}, ref) => {
   const scaleSets = [0.5, 0.75, 1, 1.25, 1.5, 2, 3]
   const [numPages, setNumPages] = useState<number | null>(null)
   const [pageNumber, setPageNumber] = useState<number>(defaultValues.page || 1)
@@ -261,6 +283,18 @@ const AdexViewer: React.FC<PDFViewerProps> = ({
   //   const savedLocale = localStorage.getItem('userLocale') || 'en';
   //   handleChangeLocale(savedLocale);
   // }, []);
+
+  useLayoutEffect(() => {
+    if (onLoaded && viewerRef.current) {
+      const r = viewerRef.current.getBoundingClientRect()
+      onLoaded({
+        x: r.left + window.scrollX,
+        y: r.top + window.scrollY,
+        width: r.width,
+        height: r.height,
+      })
+    }
+  }, []);
 
   useEffect(() => {
     const savedLocale = localStorage.getItem("userLocale")
@@ -430,6 +464,9 @@ const AdexViewer: React.FC<PDFViewerProps> = ({
   const goToPage = useCallback((pageNum: number) => {
     setPreviewNumber(pageNum)
     setPageNumber(pageNum)
+
+    onPageChanged?.(pageNum);
+
     const pageEl = pageRefs.current[pageNum]
     if (pageEl) {
       pageEl.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -700,6 +737,8 @@ const AdexViewer: React.FC<PDFViewerProps> = ({
       })
       setPreviewNumber(closestPage)
       setPageNumber(closestPage)
+
+      onPageChanged?.(closestPage)
     }
 
     const debouncedHandleScroll = debounce(handleScroll, 500) // Debouncing with a delay of 100ms
@@ -1744,6 +1783,19 @@ const AdexViewer: React.FC<PDFViewerProps> = ({
     [deleteAnnotation, updateAnnotation],
   )
 
+  useImperativeHandle(
+      ref,
+      () => ({
+        goToPage,
+        rotatePage,
+        getCurrentPage: () => pageNumber,
+        getTotalPages: () => numPages,
+        getZoom: () => scale,
+        setZoom: (z: number) => setScale(z),
+      }),
+      [goToPage, rotatePage, pageNumber, numPages, scale],
+  )
+
   // Add a class to the main viewer div based on text selection state
   // Update the className in the main div to include the bookmarks sidebar state
   return (
@@ -2706,6 +2758,6 @@ const AdexViewer: React.FC<PDFViewerProps> = ({
       </div>
     </div>
   )
-}
+})
 
-export default AdexViewer
+export default memo(AdexViewer);
