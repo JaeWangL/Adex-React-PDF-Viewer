@@ -1,6 +1,24 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
-export interface AdexViewerHandle {
+interface Annotation {
+    id: string;
+    pageNumber: number;
+    type: "highlight" | "note" | "drawing";
+    content?: string;
+    color: string;
+    position: {
+        x: number;
+        y: number;
+        width?: number;
+        height?: number;
+    };
+    points?: {
+        x: number;
+        y: number;
+    }[];
+    createdAt: number;
+}
+interface AdexViewerHandle {
     goToPage: (page: number) => void;
     rotatePage: (page: number, clockwise?: boolean) => void;
     getCurrentPage: () => number;
@@ -9,6 +27,8 @@ export interface AdexViewerHandle {
     setZoom: (z: number) => void;
 }
 interface PDFViewerProps {
+    className?: string;
+    style?: CSSProperties;
     data: {
         url: string;
     };
@@ -57,11 +77,38 @@ interface PDFViewerProps {
         height: number;
     }) => void | Promise<void>;
 }
-export interface LocalizationOptions {
+interface LocalizationOptions {
     locale: string;
     title: string;
     active: boolean;
 }
+interface SearchResult {
+    pageIndex: number;
+    matchIndex: number;
+    text: string;
+    context: string;
+    position: {
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+    };
+}
+interface OutlineItem {
+    title: string;
+    dest?: any;
+    items?: OutlineItem[];
+    pageNumber?: number;
+    expanded?: boolean;
+    id: string;
+}
+interface Bookmark {
+    id: string;
+    title: string;
+    pageNumber: number;
+    createdAt: number;
+}
+
 declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<PDFViewerProps & React.RefAttributes<AdexViewerHandle>>>;
 
-export { _default as AdexViewer };
+export { _default as AdexViewer, type AdexViewerHandle, type Annotation, type Bookmark, type OutlineItem, type SearchResult };
